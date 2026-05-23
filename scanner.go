@@ -8,19 +8,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cfindlayisme/ddtd/models"
 	"github.com/cfindlayisme/ddtd/patterns"
 )
 
-type Violation struct {
-	Severity    patterns.Severity
-	Description string
-	File        string
-	Line        int
-	Match       string
-}
-
-func scan() ([]Violation, error) {
-	var violations []Violation
+func scan() ([]models.Violation, error) {
+	var violations []models.Violation
 
 	stagedFiles, err := getStagedFiles()
 	if err != nil {
@@ -29,7 +22,7 @@ func scan() ([]Violation, error) {
 
 	for _, f := range stagedFiles {
 		if bf := patterns.MatchesBlockedFile(f); bf != nil {
-			violations = append(violations, Violation{
+			violations = append(violations, models.Violation{
 				Severity:    bf.Severity,
 				Description: bf.Name,
 				File:        f,
@@ -63,14 +56,14 @@ func getStagedFiles() ([]string, error) {
 	return files, nil
 }
 
-func scanDiff() ([]Violation, error) {
+func scanDiff() ([]models.Violation, error) {
 	cmd := exec.Command("git", "diff", "--cached", "--unified=0")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
 
-	var violations []Violation
+	var violations []models.Violation
 	var currentFile string
 	var currentLine int
 
@@ -104,7 +97,7 @@ func scanDiff() ([]Violation, error) {
 		content := line[1:]
 		for _, sp := range patterns.KeyPatterns {
 			if match := sp.Regex.FindString(content); match != "" {
-				violations = append(violations, Violation{
+				violations = append(violations, models.Violation{
 					Severity:    sp.Severity,
 					Description: sp.Name,
 					File:        currentFile,
