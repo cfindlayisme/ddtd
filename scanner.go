@@ -12,7 +12,7 @@ import (
 )
 
 type Violation struct {
-	Severity    string
+	Severity    patterns.Severity
 	Description string
 	File        string
 	Line        int
